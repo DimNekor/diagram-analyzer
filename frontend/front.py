@@ -8,6 +8,9 @@ API_URL = os.getenv("API_URL", "http://localhost:8000")
 
 def call_backend(pil_img: Image.Image, language: str, diagram_type_hint: str):
 
+    if pil_img is None:
+        return "Загрузите изображение", {}
+
     buf = BytesIO()
     pil_img.save(buf, format="PNG")
     buf.seek(0)
@@ -29,9 +32,6 @@ def call_backend(pil_img: Image.Image, language: str, diagram_type_hint: str):
 
 # Создаем интерфейс с Gradio Blocks для большей гибкости
 with gr.Blocks(title="Загрузка файлов", theme=gr.themes.Soft()) as demo:
-    language = gr.Dropdown(["ru", "en"], value="ru", label="Язык")
-    hint = gr.Dropdown(["auto", "bpmn", "uml", "c4"], value="auto", label="Подсказка типа")
-
     gr.Markdown("""
     # 📤 Загрузка и обработка файлов
     
@@ -45,7 +45,9 @@ with gr.Blocks(title="Загрузка файлов", theme=gr.themes.Soft()) as
                 label="Загрузить файл",
                 type="pil"
             )
-    
+            language = gr.Dropdown(["ru", "en"], value="ru", label="Язык")
+            hint = gr.Dropdown(["auto", "bpmn", "uml", "c4", 'png', 'jpg'], value="auto", label="Тип графика")
+
     with gr.Row():
         with gr.Column():
             gr.Markdown("### Результат обработки")
