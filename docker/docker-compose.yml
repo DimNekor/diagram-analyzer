@@ -4,9 +4,9 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.backend
     ports:
-      - "8028:8028"          # http://localhost:8028/docs
+      - "8028:8028"
     volumes:
-      - ./logs:/app/logs
+      - ./docker/logs:/app/logs
       - model_cache:/app/.models
     environment:
       - DEBUG=true
@@ -14,7 +14,7 @@ services:
       - app-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8028/"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8028/').close()"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -24,13 +24,12 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.frontend
     ports:
-      - "7860:7860"          # http://localhost:7860
+      - "7860:7860"
     environment:
       - API_URL=http://backend:8028
-    # depends_on:
-    #   # backend:
-    #   - backend
-        # condition: service_healthy
+    depends_on:
+      backend:
+        condition: service_started
     networks:
       - app-network
     restart: unless-stopped

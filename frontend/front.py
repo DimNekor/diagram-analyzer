@@ -82,7 +82,7 @@ with gr.Blocks(title="Загрузка файлов", theme=gr.themes.Soft()) as
         )
 
 demo.launch(
-    server_name="127.0.0.1",
+    server_name="0.0.0.0",
     server_port=7860,
     share=False,
     show_error=True
