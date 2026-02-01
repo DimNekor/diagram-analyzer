@@ -1,0 +1,43 @@
+services:
+  backend:
+    build: 
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    ports:
+      - "8028:8028"          # http://localhost:8028/docs
+    volumes:
+      - ./logs:/app/logs
+      - model_cache:/app/.models
+    environment:
+      - DEBUG=true
+    networks:
+      - app-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8028/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    ports:
+      - "7860:7860"          # http://localhost:7860
+    environment:
+      - API_URL=http://backend:8028
+    # depends_on:
+    #   # backend:
+    #   - backend
+        # condition: service_healthy
+    networks:
+      - app-network
+    restart: unless-stopped
+
+volumes:
+  model_cache:
+
+networks:
+  app-network:
+    driver: bridge
