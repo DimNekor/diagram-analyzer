@@ -1,0 +1,16 @@
+FROM python:3.11-slim
+
+RUN pip install --no-cache-dir uv
+
+WORKDIR /app
+
+# сначала файл зависимостей, чтобы кэшировался слой
+COPY pyproject.toml uv.lock ./
+
+# установка зависимостей в системное окружение
+RUN uv sync --locked
+
+COPY frontend/ ./frontend/
+
+EXPOSE 7860
+CMD ["uv", "run", "frontend/front.py"]

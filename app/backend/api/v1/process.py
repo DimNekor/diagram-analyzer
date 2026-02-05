@@ -1,28 +1,12 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException
-from PIL import Image
-from pydantic import BaseModel
-from typing import List, Optional
 import time
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 
-app = FastAPI(title="Diagram Recognition API", version="0.1")
+from backend.models.step import Step
+from backend.models.describing import Describing
 
-class Step(BaseModel):
-    step: int
-    action: str
-    actor: Optional[str] = None
-    system: Optional[str] = None
+router = APIRouter()
 
-class DescribeResponse(BaseModel):
-    status: str
-    diagram_type: str
-    steps: List[Step]
-    processing_time_ms: int
-
-@app.get("/health")
-def health():
-    return {"status": "ok"}
-
-@app.post("/v1/process", response_model=DescribeResponse)
+@router.post("/process", response_model=Describing)
 async def describe_diagram(
     image: UploadFile = File(...),
     language: str = Form("ru"),
@@ -40,7 +24,7 @@ async def describe_diagram(
     ]
 
     ms = int((time.time() - t0) * 1000)
-    return DescribeResponse(
+    return Describing(
         status="success",
         diagram_type=diagram_type_hint.upper() if diagram_type_hint != "auto" else "Unknown",
         steps=demo_steps,
